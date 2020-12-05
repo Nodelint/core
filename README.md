@@ -1,0 +1,2 @@
+# core
+Nodelint core
