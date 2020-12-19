@@ -1,0 +1,31 @@
+{
+  "name": "@nodelint/core",
+  "version": "1.0.0",
+  "description": "Nodelint core",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nodelint/core.git"
+  },
+  "keywords": [
+    "node",
+    "lint"
+  ],
+  "author": "GENTILHOMME Thomas <gentilhomme.thomas@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Nodelint/core/issues"
+  },
+  "homepage": "https://github.com/Nodelint/core#readme",
+  "devDependencies": {
+    "@slimio/eslint-config": "^4.1.0",
+    "@types/node": "^14.14.14"
+  },
+  "dependencies": {
+    "@slimio/config": "^0.17.1"
+  }
+}
