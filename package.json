@@ -26,6 +26,9 @@
     "@types/node": "^14.14.14"
   },
   "dependencies": {
-    "@slimio/config": "^0.17.1"
+    "@slimio/config": "^0.18.0",
+    "ajv": "^7.2.1",
+    "lodash.set": "^4.3.2",
+    "yn": "^4.0.0"
   }
 }

@@ -7,10 +7,18 @@
                 {
                     "type": "object",
                     "additionalProperties": true
+                },
+                {
+                    "type": "boolean"
+                },
+                {
+                    "type": "string"
                 }
             ]
         }
     },
+    "additionalProperties": true,
+    "required": ["extends"],
     "properties": {
         "extends": {
             "oneOf": [
