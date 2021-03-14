@@ -5,12 +5,19 @@ import fs from "fs";
 
 // Import Third-party Dependencies
 import Config from "@slimio/config";
+import Ajv from "ajv";
 import yn from "yn";
 import set from "lodash.set";
+
+// Import Internal Dependencies
+import * as FileSystem from "./src/filesystem.js";
 
 // CONSTANTS
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const kNodelintUserConfigSchema = JSON.parse(fs.readFileSync(path.join(__dirname, "src", "configuration.schema.json"), "utf-8"));
+
+// eslint-disable-next-line new-cap
+const ajv = new Ajv.default({ allErrors: true });
 
 // eslint-disable-next-line func-style
 const isFilePath = (name) => name.startsWith(".");
@@ -49,11 +56,12 @@ async function parseExtension(extension, location) {
     return new Map(policies.map((policy) => [policy.name, policy]));
 }
 
-function applyPolicyConfiguration(policy, configuration) {
+function loadOnePolicyConfiguration(policy, configuration) {
     const events = policy.eventsMap;
     const configurationByEventName = new Map();
     const keyToIgnore = new Set();
 
+    // Search for custom configuration
     for (const [key, value] of Object.entries(configuration)) {
         const isPropertySetter = key.includes(".");
         const [eventName] = key.split(".", 1);
@@ -74,13 +82,27 @@ function applyPolicyConfiguration(policy, configuration) {
                 configurationByEventName.set(eventName, ref);
             }
         }
-        else if (!yn(value)) {
-            keyToIgnore.add(eventName);
-            events.get(eventName).enabled = false;
+        else {
+            const enabledKey = yn(value);
+            if (!enabledKey) {
+                keyToIgnore.add(eventName);
+            }
+            events.get(eventName).enabled = enabledKey;
         }
     }
 
-    console.log(configurationByEventName);
+    // Apply custom configuration to events!
+    for (const [eventName, eventCustomConfig] of configurationByEventName) {
+        const event = events.get(eventName);
+        const validate = ajv.compile(event.parametersJSONSchema);
+
+        if (!validate(eventCustomConfig)) {
+            console.log(validate.errors);
+            event.enabled = false;
+            continue;
+        }
+        Object.assign(event, eventCustomConfig);
+    }
 }
 
 export async function load(location = process.cwd()) {
@@ -92,11 +114,48 @@ export async function load(location = process.cwd()) {
 
     await cfg.read();
     const nodeLintConfig = cfg.payload;
+    await cfg.close();
 
     const policies = await parseExtension(nodeLintConfig.extends, location);
     for (const [policyName, configuration] of Object.entries(nodeLintConfig.rules)) {
         if (policies.has(policyName)) {
-            applyPolicyConfiguration(policies.get(policyName), configuration);
+            loadOnePolicyConfiguration(policies.get(policyName), configuration);
+        }
+        else {
+            console.error(`Unable to found any policy with name: '${policyName}'`);
+        }
+    }
+
+    return policies;
+}
+
+export async function run(location = process.cwd(), policies) {
+    console.log("run at location, ", location);
+    const scopedPolicies = new Map();
+    for (const policy of policies.values()) {
+        for (const scopeName of policy.scope) {
+            if (scopedPolicies.has(scopeName)) {
+                scopedPolicies.get(scopeName).push(policy);
+            }
+            else {
+                scopedPolicies.set(scopeName, [policy]);
+            }
+        }
+    }
+
+    console.log(scopedPolicies);
+    for await (const [type, filePath] of FileSystem.getFilesRecursive(location)) {
+        switch (type) {
+            case FileSystem.DIR:
+                console.log(filePath);
+                break;
+            case FileSystem.FILE: {
+                const basename = path.basename(filePath);
+
+                if (scopedPolicies.has(basename)) {
+                    console.log(basename);
+                }
+            }
         }
     }
 }
