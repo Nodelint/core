@@ -1,0 +1,34 @@
+{
+  "name": "@nodelint/policy",
+  "version": "1.0.0",
+  "description": "Nodelint policy",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nodelint/policy.git"
+  },
+  "keywords": [
+    "node",
+    "lint",
+    "project",
+    "policy"
+  ],
+  "author": "GENTILHOMME Thomas <gentilhomme.thomas@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Nodelint/policy/issues"
+  },
+  "homepage": "https://github.com/Nodelint/policy#readme",
+  "devDependencies": {
+    "@slimio/eslint-config": "^4.1.0"
+  },
+  "dependencies": {
+    "@slimio/oop": "^2.0.0",
+    "change-case": "^4.1.2",
+    "rosetta": "^1.1.0"
+  }
+}
