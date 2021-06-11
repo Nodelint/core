@@ -1,0 +1,4 @@
+extends = [ "./customPolicy" ]
+
+[rules.CustomPolicy]
+"foo.burst" = true
