@@ -21,7 +21,7 @@ async function* main(ctx) {
 const i18n = await Policy.loadi18n(path.join(__dirname, "i18n"));
 
 export default new Policy({
-    name: "custom",
+    name: "CustomPolicy",
     mode: CONSTANTS.Mode.Asynchronous,
     defaultLang: "french",
     scope: [".eslintrc"],

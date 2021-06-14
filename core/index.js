@@ -116,7 +116,7 @@ export async function load(location = process.cwd()) {
     const nodeLintConfig = cfg.payload;
     await cfg.close();
 
-    const policies = await parseExtension(nodeLintConfig.extends, location);
+    const policies = await parseExtension(nodeLintConfig.extends, path.join(location, "policies/src"));
     for (const [policyName, configuration] of Object.entries(nodeLintConfig.rules)) {
         if (policies.has(policyName)) {
             loadOnePolicyConfiguration(policies.get(policyName), configuration);
