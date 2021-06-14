@@ -1,0 +1,10 @@
+{
+    "extends": [
+        "./customPolicy"
+    ],
+    "rules": {
+        "customPolicy": {
+            "foo.burst": true
+        }
+    }
+}

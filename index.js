@@ -42,10 +42,10 @@ async function parseExtension(extension, location) {
 
     const policyToLoad = [];
     for (const nameOrPath of extension) {
+        const policiesPath = path.join(path.dirname(location), "policies");
         const policyPath = isFilePath(nameOrPath) ?
-            path.join(location, nameOrPath) :
+            path.join(policiesPath, nameOrPath) :
             path.join(location, "node_modules", nameOrPath);
-
         policyToLoad.push(loadStandalonePolicy(path.join(policyPath, "index.js")));
     }
 
