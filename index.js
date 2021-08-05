@@ -153,7 +153,11 @@ export async function run(location = process.cwd(), policies) {
                 const basename = path.basename(filePath);
 
                 if (scopedPolicies.has(basename)) {
-                    console.log(basename);
+                    for await(const scopedPolicy of scopedPolicies.get(basename)[Symbol.iterator]()) {
+                        scopedPolicy
+                            .main(scopedPolicy)
+                            .next()
+                    }
                 }
             }
         }
