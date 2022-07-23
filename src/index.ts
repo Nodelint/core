@@ -5,10 +5,14 @@ import fs from "fs";
 
 // Import Third-party Dependencies
 import Config from "@slimio/config";
+import { Policy } from "@nodelint/policy";
 import Ajv from "ajv";
 import yn from "yn";
 import set from "lodash.set";
 import { walk } from "@nodesecure/fs-walk";
+
+// Import Internal Dependencies
+import * as utils from "./utils.js";
 
 // CONSTANTS
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -16,7 +20,6 @@ const kNodelintUserConfigSchema = JSON.parse(fs.readFileSync(path.join(__dirname
 
 const ajv = new Ajv({ allErrors: true });
 
-const isFilePath = (name: string) => name.startsWith(".");
 
 async function loadStandalonePolicy(policyLocation: string) {
   try {
@@ -34,12 +37,13 @@ async function loadStandalonePolicy(policyLocation: string) {
 
 async function parseExtension(extension: string | string[], location: string) {
   if (typeof extension === "string") {
+    // eslint-disable-next-line no-param-reassign
     extension = [extension];
   }
 
   const policyToLoad: any[] = [];
   for (const nameOrPath of extension) {
-    const policyPath = isFilePath(nameOrPath) ?
+    const policyPath = utils.isFilePath(nameOrPath) ?
       path.join(location, nameOrPath) :
       path.join(location, "node_modules", nameOrPath);
 
@@ -48,7 +52,7 @@ async function parseExtension(extension: string | string[], location: string) {
 
   const policies = (await Promise.allSettled(policyToLoad))
     .filter((_p) => _p.status === "fulfilled")
-    .map((_p) => _p.value);
+    .map((_p) => (_p as PromiseFulfilledResult<Policy<any>>).value);
 
   return new Map(policies.map((policy) => [policy.name, policy]));
 }
