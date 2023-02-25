@@ -1,0 +1,37 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "contributors": [
+    {
+      "login": "fraxken",
+      "name": "Gentilhomme",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4438263?v=4",
+      "profile": "https://www.linkedin.com/in/thomas-gentilhomme/",
+      "contributions": [
+        "code",
+        "doc",
+        "security",
+        "test"
+      ]
+    },
+    {
+      "login": "Kawacrepe",
+      "name": "Vincent Dhennin",
+      "avatar_url": "https://avatars.githubusercontent.com/u/40260517?v=4",
+      "profile": "https://github.com/Kawacrepe",
+      "contributions": [
+        "code",
+        "doc"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "projectName": "policy",
+  "projectOwner": "Nodelint",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "skipCi": true
+}

@@ -1,2 +1,3 @@
-# core
-Nodelint core
+# Nodelint
+
+TBC CLI Doc?

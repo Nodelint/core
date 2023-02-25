@@ -1,0 +1,34 @@
+{
+  "name": "@nodelint/policy",
+  "version": "1.1.1",
+  "description": "Nodelint policy",
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "exports": "./dist/index.js",
+  "scripts": {
+    "build": "rimraf ./dist && tsc",
+    "prepublishOnly": "npm run build",
+    "test": "mocha --parallel",
+    "coverage": "c8 -r html npm test",
+    "lint": "eslint src/*.ts"
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "node",
+    "lint",
+    "project",
+    "policy"
+  ],
+  "author": "GENTILHOMME Thomas <gentilhomme.thomas@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@slimio/oop": "^2.0.0",
+    "change-case": "^4.1.2",
+    "rosetta": "^1.1.0"
+  },
+  "devDependencies": {
+    "rimraf": "^4.1.2"
+  }
+}
