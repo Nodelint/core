@@ -10,9 +10,26 @@ import rosetta, { Rosetta } from "rosetta";
 // Import internal dependencies
 import { Event, EventMessage } from "./event.js";
 
-export type PolicyEventMessage = symbol | EventMessage;
+export type PolicyContext = {
+  /**
+   * Absolute root location of the project under analysis
+   */
+  rootLocation: string;
+  /**
+   * Absolute location of current scope.
+   * If scope is null scopeLocation and rootLocation are strictly equal.
+   *
+   * ex: src/workspace/
+   */
+  scopeLocation: string;
+  /**
+   * The detected file (or nothing if null).
+   */
+  scope: string | null;
+}
 
-export type PolicyExecutor = () => AsyncIterableIterator<PolicyEventMessage>;
+export type PolicyEventMessage = symbol | EventMessage;
+export type PolicyExecutor = (ctx: PolicyContext) => AsyncIterableIterator<PolicyEventMessage>;
 
 export interface PolicyOptions<T> {
   /** Name of the policy */
@@ -27,11 +44,15 @@ export interface PolicyOptions<T> {
   /**
    * Scope of execution for the policy.
    * This is a list of files, for example ".eslintrc", ".eslintignore" etc..
+   *
+   * null mean global scope (can be useful for policies who need to enforce rules on directories)
+   *
+   * @default null
    */
-  scope: Iterable<string>;
+  scope?: Iterable<string> | null;
   i18n: Rosetta<T>;
   /**
-   * Main executor for the policy (a Synchronous or Asynchronous generator).
+   * Main executor for the policy (Asynchronous generator).
    */
   main: PolicyExecutor;
   /**
@@ -49,7 +70,7 @@ export class Policy<T> {
   public name: string;
   public mode: symbol;
   public defaultLang: string | null;
-  public scope: Set<string>;
+  public scope: Set<string> | null;
   public events: Map<string, Event>;
   public main: PolicyExecutor;
   public i18n: Rosetta<T>;
@@ -57,13 +78,13 @@ export class Policy<T> {
   constructor(options: PolicyOptions<T>) {
     const finalOptions = Object.assign(
       {},
-      { defaultLang: Policy.DefaultI18nLanguage },
+      { defaultLang: Policy.DefaultI18nLanguage, scope: null },
       options
     );
 
     this.name = oop.toString(finalOptions.name, { allowEmptyString: false });
     this.defaultLang = oop.toNullableString(finalOptions.defaultLang);
-    this.scope = new Set(oop.toIterable(finalOptions.scope));
+    this.scope = finalOptions.scope === null ? null : new Set(oop.toIterable(finalOptions.scope));
     this.events = new Map(Object.entries(finalOptions.events));
     this.main = finalOptions.main;
 

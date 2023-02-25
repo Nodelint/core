@@ -1,7 +1,7 @@
 // Import Node.js Dependencies
-import { fileURLToPath, pathToFileURL } from "url";
-import path from "path";
-import fs from "fs";
+import { fileURLToPath, pathToFileURL } from "node:url";
+import path from "node:path";
+import fs from "node:fs";
 
 // Import Third-party Dependencies
 import Config from "@slimio/config";
