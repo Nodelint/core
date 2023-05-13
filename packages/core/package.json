@@ -22,15 +22,8 @@
   ],
   "author": "GENTILHOMME Thomas <gentilhomme.thomas@gmail.com>",
   "license": "MIT",
-  "devDependencies": {
-    "@types/lodash.set": "^4.3.7"
-  },
   "dependencies": {
-    "@nodelint/policy": "file:../policy",
-    "@nodesecure/fs-walk": "^1.0.0",
-    "@slimio/config": "^1.2.0",
-    "ajv": "^8.11.0",
-    "lodash.set": "^4.3.2",
-    "yn": "^5.0.0"
+    "@npm/types": "^1.0.2",
+    "@openally/result": "^1.1.0"
   }
 }
