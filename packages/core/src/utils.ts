@@ -26,3 +26,12 @@ export function taggedString(chaines: TemplateStringsArray, ...cles: string[] | 
     return resultat.join("");
   };
 }
+
+export function isPlainObject(value: any): boolean {
+  if (Object.prototype.toString.call(value).slice(8, -1) !== "Object") {
+    return false;
+  }
+  const proto = Object.getPrototypeOf(value);
+
+  return proto === Object.getPrototypeOf({}) || proto === null;
+}

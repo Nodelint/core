@@ -1,3 +1,6 @@
+// Import Node.js Dependencies
+import fs from "node:fs/promises";
+
 // Import Internal Dependencies
 import * as policies from "../policies/policies.js";
 import { Warning, PoliciesName } from "../types.js";
@@ -30,6 +33,7 @@ export class Executor<T extends PoliciesName = PoliciesName> {
 
   #workingDir: string;
   #policies: Map<T, policies.Configurations[T]> = new Map();
+  #files: Set<string> = new Set();
   #executed = false;
   #i18n: string | null = null;
 
@@ -44,6 +48,14 @@ export class Executor<T extends PoliciesName = PoliciesName> {
     if (policies) {
       policies.forEach((pair) => this.loadPolicy(...pair));
     }
+  }
+
+  get workingDir() {
+    return this.#workingDir;
+  }
+
+  get i18n() {
+    return this.#i18n;
   }
 
   get executed() {
@@ -63,6 +75,21 @@ export class Executor<T extends PoliciesName = PoliciesName> {
     return this;
   }
 
+  hasFile(name: string) {
+    return this.#files.has(name);
+  }
+
+  async #scanWorkingDir() {
+    const dirents = await fs.readdir(this.#workingDir, {
+      withFileTypes: true
+    });
+
+    const files = dirents
+      .filter((dirent) => dirent.isFile())
+      .map((dirent) => dirent.name);
+    this.#files = new Set(files);
+  }
+
   async* getWarnings(
     options: ExecutorWarningsOptions = {}
   ): AsyncIterableIterator<Required<Warning>> {
@@ -71,13 +98,12 @@ export class Executor<T extends PoliciesName = PoliciesName> {
     if (this.#executed) {
       throw new Error("An executor can only be used once");
     }
+    await this.#scanWorkingDir();
 
     try {
       for (const [name, config] of this.#policies) {
         const policy = policies[name];
-        const result = await policy.main(this.#workingDir, config, {
-          i18n: this.#i18n
-        });
+        const result = await policy.main(this.#workingDir, config, this);
 
         if (result.ok) {
           yield* result.val.map(

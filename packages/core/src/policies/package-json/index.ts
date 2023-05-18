@@ -1,5 +1,5 @@
 // Import Third-party Dependencies
-import { Ok, Err, Result } from "@openally/result";
+import { Result, Option, Some, None } from "@openally/result";
 import * as npm from "@npm/types";
 
 // Import Internal Dependencies
@@ -7,7 +7,7 @@ import WarningInstanciator from "../../class/WarningInstanciator.js";
 import * as warningsI18n from "./warnings/index.js";
 import * as types from "../../types.js";
 import * as utils from "./utils.js";
-import { ExecutorPolicyOptions } from "../../class/Executor.js";
+import { Executor } from "../../class/Executor.js";
 
 type PackageJsonExtended = npm.PackageJson & {
   type?: "script" | "module";
@@ -50,28 +50,28 @@ export class PackageJSON extends WarningInstanciator<typeof warningsI18n.english
     this.packageJSON = packageJSON;
   }
 
-  private assertVersion() {
+  private assertVersion(): Option<types.Warning> {
     if (this.config.authorizeSemverZero) {
-      return Ok(void 0);
+      return None;
     }
 
     return this.packageJSON.version.startsWith("0.") ?
-      Err(this.getBaseWarningFromCode("VERO")) :
-      Ok(void 0);
+      Some(this.getBaseWarningFromCode("VERO")) :
+      None;
   }
 
-  private assertType(expectedType = "any") {
+  private assertType(expectedType = "any"): Option<types.Warning> {
     const type = this.packageJSON.type ?? "script";
     if (expectedType === "any" || type === expectedType) {
-      return Ok(void 0);
+      return None;
     }
 
-    return Err(
+    return Some(
       this.getBaseWarningFromCode("TYPE", { expectedType, type })
     );
   }
 
-  private* assertScripts() {
+  private* assertScripts(): IterableIterator<Option<types.Warning>> {
     const expectedScripts = new Map(Object.entries(this.config.scripts));
     if (expectedScripts.size === 0) {
       return;
@@ -86,11 +86,11 @@ export class PackageJSON extends WarningInstanciator<typeof warningsI18n.english
         const scriptValue = scripts[expectedScriptName];
 
         if (!expectedScriptValue.match(scriptValue)) {
-          yield Err(this.getBaseWarningFromCode("INVALID_SCRIPT", { expectedScriptName }));
+          yield Some(this.getBaseWarningFromCode("INVALID_SCRIPT", { expectedScriptName }));
         }
       }
       else {
-        yield Err(this.getBaseWarningFromCode("MISSING_SCRIPT", { expectedScriptName }));
+        yield Some(this.getBaseWarningFromCode("MISSING_SCRIPT", { expectedScriptName }));
       }
     }
   }
@@ -100,7 +100,7 @@ export class PackageJSON extends WarningInstanciator<typeof warningsI18n.english
       this.assertVersion(),
       this.assertType(this.config.type),
       ...this.assertScripts()
-    ].flatMap((result) => (result.err ? [result.val] : []));
+    ].flatMap((option) => (option.some ? [option.safeUnwrap()] : []));
   }
 }
 
@@ -109,9 +109,9 @@ export const name = "package-json";
 export async function main(
   workingDir: string,
   config: PackageJSONOptions,
-  executorOptions: ExecutorPolicyOptions
+  executor: Executor
 ): Promise<Result<types.Warning[], Error>> {
-  const { i18n } = executorOptions;
+  const { i18n } = executor;
 
   return (await utils.safeReadPackageJSON(workingDir))
     .mapErr((cause) => new Error("Unable to read and/or parse package.json", { cause }))

@@ -1,4 +1,5 @@
-# Logs
+
+export const nodejs = `# Logs
 logs
 *.log
 npm-debug.log*
@@ -127,7 +128,4 @@ dist
 .yarn/unplugged
 .yarn/build-state.yml
 .yarn/install-state.gz
-
-temp/
-packages/core/temp
-packages/policy/temp
+.pnp.*`;
