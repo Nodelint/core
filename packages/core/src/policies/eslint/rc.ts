@@ -6,7 +6,14 @@ import fs from "node:fs/promises";
 import { Ok, Err, Result } from "@openally/result";
 import { match } from "ts-pattern";
 
-export type EslintRC = any;
+export type EslintRC = {
+  extends?: string | string[];
+  parserOptions?: {
+    sourceType?: string;
+    requireConfigFile?: boolean;
+  };
+  rules?: Record<string, any>;
+};
 
 export async function read(
   location: string
@@ -25,7 +32,7 @@ async function safeReadJSON(
 ): Promise<Result<EslintRC, NodeJS.ErrnoException>> {
   try {
     const rawStr = await fs.readFile(location, "utf-8");
-    const rc = JSON.parse(rawStr) as unknown;
+    const rc = JSON.parse(rawStr) as EslintRC;
 
     return Ok(rc);
   }

@@ -2,7 +2,7 @@
 import path from "node:path";
 
 // Import Third-party Dependencies
-import { Ok, Err, Result } from "@openally/result";
+import { Err, Result, None, Some, Option } from "@openally/result";
 
 // Import Internal Dependencies
 import WarningInstanciator from "../../class/WarningInstanciator.js";
@@ -23,28 +23,35 @@ export class EslintRC extends WarningInstanciator<typeof warningsI18n.english> {
   };
 
   private config: Required<EslintOptions>;
-  private rc: any;
+  private rc: rc.EslintRC;
 
   constructor(
-    rc: any,
+    rc: rc.EslintRC,
     options: EslintOptions,
     i18n: string | null
   ) {
     super(
       i18n === null ? warningsI18n.english : (warningsI18n?.[i18n] ?? warningsI18n.english)
     );
-    this.file = "package.json";
 
     this.config = Object.assign(EslintRC.DEFAULT, options);
     this.rc = rc;
   }
 
+  private hasRule(): Option<types.Warning> {
+    const numberOfRules = Object.keys(this.rc?.rules ?? {}).length;
+
+    if (!this.config.allowRules && numberOfRules > 0) {
+      return Some(this.getBaseWarningFromCode("NORULES"));
+    }
+
+    return None;
+  }
+
   getWarnings(): types.Warning[] {
-    return [];
-
-    // return [
-
-    // ].flatMap((result) => (result.err ? [result.val] : []));
+    return [
+      this.hasRule()
+    ].flatMap((option) => (option.some ? [option.safeUnwrap()] : []));
   }
 }
 
@@ -55,17 +62,19 @@ export async function main(
   config: EslintOptions,
   executor: Executor
 ): Promise<Result<types.Warning[], Error>> {
-  // const { i18n } = executor;
+  const { i18n } = executor;
 
   const rcFileName = [".eslintrc", ".eslintrc.js", ".eslintrc.json"]
     .find((fileName) => executor.hasFile(fileName));
   if (!rcFileName) {
     return Err(new Error("Unable to found any eslint runtime configuration file"));
   }
-  const eslintRc = await rc.read(path.join(workingDir, rcFileName));
-  if (eslintRc.err) {
-    return Err(eslintRc.val);
-  }
 
-  return Ok([]);
+  return (await rc.read(path.join(workingDir, rcFileName)))
+    .map((rc) => {
+      const eslintRc = new EslintRC(rc, config, i18n);
+      eslintRc.file = rcFileName;
+
+      return eslintRc.getWarnings();
+    });
 }
